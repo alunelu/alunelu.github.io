@@ -1,0 +1,301 @@
+<html>
+	<body>
+		<p id="xText"></p>
+		<p id="dxText"></p>
+		<p id="keyText"></p>
+		<p id="msgText"></p>
+		<canvas id="myCanvas" width="1500" height="500" onclick="onHit();"></canvas>
+		<p>
+		<button type="button" style="width:150px;height:100px" onclick="onLeft();">Left</button>
+		<button type="button" style="width:150px;height:100px" onclick="onRight();">Right</button>
+		<button type="button" style="width:150px;height:100px" onclick="onSlower();">Slower</button>
+		<button type="button" style="width:150px;height:100px" onclick="onFaster();">Faster</button>
+		<button type="button" style="width:150px;height:100px" onclick="onHit();">Hit</button>
+		<button type="button" style="width:150px;height:100px" onclick="onPause();">Pause</button>
+		<script>
+
+
+			function gard(ctx) {
+			    ctx.fillStyle = "#ffff88";
+				ctx.fillRect(0, 0, myWidth, 250);
+
+				ctx.fillStyle = "#EEDD9B";
+				ctx.fillRect(0, 250, myWidth, 500);
+
+				ctx.strokeStyle = "#cEbD7B";
+				ctx.lineWidth = 1;
+
+				var mul=10;
+				for (var j = 0; j < 10; j++) {
+					var y = j*mul*2 + 250;
+					ctx.moveTo(0, y);
+					for (var i = 0; i < 475; i++) {
+						ctx.lineTo(mul*i, mul*Math.sin(i)+y);
+					}
+
+					ctx.moveTo(0, y);
+
+					for (i = 0; i < 324; i++) {
+						ctx.lineTo(mul*i, -mul*Math.sin(i)+y);
+					}
+				}
+
+				ctx.stroke();
+			}
+
+			function om(ctx, x) {
+				ctx.beginPath();
+
+				ctx.strokeStyle = "#00e8e8";
+				ctx.lineWidth = 2;
+
+				ctx.arc(x + 50, y + 50, 40, 0, 2 * Math.PI);
+
+				ctx.moveTo(x + 50, y + 90);
+				ctx.lineTo(x + 50, y + 200);
+
+				ctx.moveTo(x + 50, y + 200)
+				ctx.lineTo(x + 100, y + 250)
+
+				ctx.moveTo(x + 50, y + 200)
+				ctx.lineTo(x + 0, y + 250)
+
+				ctx.moveTo(x + 50, y + 92)
+				ctx.lineTo(x + 100, y + 130)
+
+				ctx.moveTo(x + 50, y + 92)
+				ctx.lineTo(x + 0, y + 130)
+
+				ctx.stroke();
+			}
+
+			function iarba(ctx) {
+				ctx.beginPath();
+
+				ctx.strokeStyle = "#007c00";
+				ctx.lineWidth = 1;
+
+				nrFire = myWidth / 10;
+				for (var i = 0; i < nrFire; i++) {
+					ctx.moveTo(0 + i*10,500)
+					ctx.lineTo(0 + i*10,450)
+
+					ctx.moveTo(5 + i*10,500)
+					ctx.lineTo(5 + i*10,446)
+				}
+
+				ctx.stroke();
+			}
+
+			function linii(ctx, x) {
+				ctx.beginPath();
+
+				ctx.strokeStyle = "#f000ff";
+				ctx.lineWidth = 5;
+
+				ctx.moveTo(x, 250)
+				ctx.lineTo(x, 500)
+
+				ctx.stroke();
+			}
+
+			function showText(ctrl, text) {
+				ctrl.innerHTML = "" + text;
+			}
+
+			function info() {
+				showText(xText, x + "," + y);
+				showText(dxText, dx);
+			}
+
+
+			function sleep(ms) {
+			  return new Promise(resolve => setTimeout(resolve, ms));
+			}
+
+			function draw(ctx, x) {
+			    ctx.clearRect(0, 0, canvas.width, canvas.height);
+				gard(ctx);
+				om(ctx, x);
+				iarba(ctx);
+				linii(ctx, xMiddle - dxLines / 2);
+				linii(ctx, xMiddle + dxLines / 2);
+				info();
+			}
+
+			function redraw() {
+				draw(ctx, x);
+			}
+
+			var myWidth = myCanvas.width;
+			var myHeight = myCanvas.height;
+			var xMiddle = myWidth / 2;
+			var delay = 16;
+			var x;
+			var y;
+			var startY = 250;
+			var dx;
+			var dy;
+			var dyJump = 30;
+			var acc = 2;
+			var dir;
+			var dxLines;
+			var nrHits;
+			var nrMistakes;
+			var pause;
+			var stop;
+
+
+			document.addEventListener('keydown', onKeydown);
+
+			var xText = document.getElementById("xText");
+			var dxText = document.getElementById("dxText");
+
+			var canvas = document.getElementById("myCanvas");
+			var ctx = canvas.getContext("2d");
+
+			//ctx.fillStyle = "#FF0000";
+			//ctx.fillRect(0, 0, 55, 75);
+
+			reset();
+
+			anim(ctx);
+
+			function reset() {
+				x = 0;
+				y = startY;
+				dx = 10;
+				dy = 0;
+				dir = 1;
+				dxLines = 300;
+				nrHits = 0;
+				nrMistakes = 0;
+				pause = true;
+				stop = false;
+				redraw();
+			}
+
+			async function anim(ctx) {
+				while (true) {
+					if (!pause) {
+						x += dir * dx;
+						if (x < 0) {
+							dir = 1;
+						}
+						if (x > myWidth - 100) {
+							dir = -1;
+						}
+
+						if (y < startY) {
+							dy += acc;
+						}
+						y += dy;
+						if (y >= startY && dy > 0) {
+							y = startY;
+							dy = -dy/2;
+							if (-dy <= acc) {
+								dy = 0;
+							}
+						}
+
+						redraw();
+					}
+					await sleep(delay);
+				}
+			}
+
+			function onLeft() {
+				dir = -1;
+			}
+
+			function onRight() {
+				dir = 1;
+			}
+
+			function onSlower() {
+				dx = dx / 2;
+			}
+
+			function onFaster() {
+				dx = dx * 2;
+			}
+
+			function onJump() {
+				dy = -dyJump;
+			}
+
+			function onHit() {
+				if (pause) {
+					pause = !pause;
+					return;
+				}
+
+				xLeftMan = x;
+				xRightMan = x + 100;
+				xLeftLine = xMiddle - dxLines / 2;
+				xRightLine = xMiddle + dxLines /2;
+
+				if (xLeftMan > xLeftLine && xRightMan < xRightLine) {
+					nrHits++;
+					dxLines -= 10;
+					if (dxLines <= 200) {
+						showText(msgText, "ai castigat dupa " + nrHits + " nimerite");
+						reset();
+						pause = true;
+					} else {
+						showText(msgText, "ai nimerit a " + nrHits + "-a oara");
+						redraw();
+					}
+				} else {
+				    nrMistakes++;
+					if (nrMistakes < 5) {
+						showText(msgText, nrMistakes + " greseli. mai incearca");
+					} else {
+						showText(msgText, "ai pierdut dupa " + nrHits + " nimerite");
+						reset();
+						pause = true;
+					}
+				}
+			}
+
+			function onPause() {
+				pause = !pause;
+			}
+
+			function onReset() {
+				reset();
+			}
+
+			function onKeydown(e) {
+				keyText.innerHTML = "" + e.keyCode;
+				switch (e.keyCode) {
+					case 37:
+						onLeft()
+						break;
+					case 39:
+						onRight();
+						break;
+					case 38:
+						onFaster();
+						break;
+					case 40:
+						onSlower();
+						break;
+					case 88:
+						onJump();
+						break;
+					case 13:
+						onHit();
+						break;
+					case 82:
+						onReset();
+						break;
+					case 80:
+						pause = !pause;
+						break;
+				}
+            }
+
+		</script>
+	</body>
+</html>
